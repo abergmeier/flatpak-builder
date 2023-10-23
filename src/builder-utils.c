@@ -1454,6 +1454,19 @@ xml_start_element (GMarkupParseContext *context,
 {
   XmlData *data = user_data;
   FlatpakXml *node;
+  const char *invalid_chars = "<>'\"";
+
+  for (uint i = 0; attribute_values[i]; i++)
+    {
+      const char *value = attribute_values[i];
+      for (uint j = 0; invalid_chars[j]; j++) {
+        if (strchr (value, invalid_chars[j]))
+          {
+            g_set_error (error, G_IO_ERROR, G_MARKUP_ERROR_INVALID_CONTENT, "Invalid character %c in XML attribute", invalid_chars[j]);
+            return;
+          }
+      }
+    }
 
   node = flatpak_xml_new_with_attributes (element_name,
                                           attribute_names,
